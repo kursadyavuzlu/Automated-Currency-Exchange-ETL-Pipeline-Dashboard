@@ -1,0 +1,65 @@
+version: '3.8'
+
+networks:
+  etl_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
+services:
+  postgres_db:
+    image: postgres:15 # Sürümü sabitlemek Windows'ta kararlılığı artırır
+    container_name: my_postgres_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: aranel33
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - etl_network
+
+  airflow-webserver:
+    image: apache/airflow:2.7.1
+    container_name: airflow_webserver
+    # Komutu daha sade ve güvenli hale getirdik
+    command: >
+      bash -c "airflow db init && 
+      airflow users create --username admin --firstname Kursad --lastname Yavuzlu --role Admin --email admin@example.com --password admin && 
+      airflow webserver"
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:aranel33@postgres_db:5432/postgres
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    user: "${AIRFLOW_UID:-50000}:0"
+    networks:
+      - etl_network
+    depends_on:
+      - postgres_db
+
+  airflow-scheduler:
+    image: apache/airflow:2.7.1
+    container_name: airflow_scheduler
+    command: scheduler
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://postgres:aranel33@postgres_db:5432/postgres
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    user: "${AIRFLOW_UID:-50000}:0"
+    networks:
+      - etl_network
+    depends_on:
+      - postgres_db
