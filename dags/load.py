@@ -12,19 +12,25 @@ def insert_data(connection, data_list):
 
     connection.commit()
     cursor.close()
-    print("DATAS UPLOAD SUCCESFULY")
+    print("DATAS UPLOAD SUCCESSFULY")
+    
+def run_load_process(**kwargs):
+    
+    ti = kwargs['ti']
+    
+    real_data = ti.xcom_pull(task_ids='transform_data')
+    
+    print("Cleaned data successfully pulled from XCom")
 
-def run_load_process(real_data):
     try:
         connection = psycopg2.connect(
-            host="localhost",
+            host="my_postgres_container",
             database="postgres",
             user="postgres",
             password="aranel33",
             port="5432"
         )
         print("CONNECTION SUCCESS")
-        
         
         cursor = connection.cursor()
         cursor.execute("""
@@ -40,10 +46,10 @@ def run_load_process(real_data):
         cursor.close()
         print("TABLE CREATED SUCCESSFULLY")
         
-        
         insert_data(connection, real_data)
         
         connection.close()
 
     except Exception as error:
         print(f"ERROR FIND!!! ---> {error}")
+        raise error

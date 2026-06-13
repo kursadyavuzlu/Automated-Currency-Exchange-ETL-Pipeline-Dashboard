@@ -9,7 +9,7 @@ volumes:
 
 services:
   postgres_db:
-    image: postgres:15 # Sürümü sabitlemek Windows'ta kararlılığı artırır
+    image: postgres:15
     container_name: my_postgres_container
     environment:
       POSTGRES_USER: postgres
@@ -25,7 +25,7 @@ services:
   airflow-webserver:
     image: apache/airflow:2.7.1
     container_name: airflow_webserver
-    # Komutu daha sade ve güvenli hale getirdik
+    
     command: >
       bash -c "airflow db init && 
       airflow users create --username admin --firstname Kursad --lastname Yavuzlu --role Admin --email admin@example.com --password admin && 

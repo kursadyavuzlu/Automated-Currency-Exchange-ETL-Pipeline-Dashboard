@@ -1,6 +1,6 @@
-from extract import extract_data
-from transform import transform_data
-from load import run_load_process
+from dags.extract import extract_data
+from dags.transform import transform_data
+from dags.load import run_load_process
 
 def main():
     print("<--- ETL PIPELINE START --->")
