@@ -189,6 +189,10 @@ docs/dashboard-preview.png
 
 ---
 
-## 📄 License
+## 🎯 What This Project Demonstrates
 
-This project is intended for educational and portfolio purposes.
+- Building automated ETL pipelines
+- Workflow orchestration with Apache Airflow
+- Containerized development using Docker Compose
+- Relational database design with PostgreSQL
+- Developing analytical dashboards with Streamlit
