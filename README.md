@@ -1,88 +1,194 @@
-Automated Currency Exchange ETL Pipeline and Dashboard
+# 💱 Automated Currency Exchange ETL Pipeline & Dashboard
 
-  An end-to-end, production-ready data engineering project that automates the process of extracting foreign exchange rates, transforming raw data into structured models, storing them in a secure database, and serving them through an interactive web dashboard.
+An end-to-end data engineering project that automates the ingestion, transformation, storage, and visualization of foreign exchange rate data.
 
-📌 Project Overview and Value Proposition
-  
-  In modern data architectures, relying on manual data collection or brittle script execution leads to data loss and operational inefficiencies. This project replaces manual intervention with an automated, containerized, and orchestrated data factory.
+The pipeline extracts daily exchange rates from the Frankfurter API, processes the data using Pandas, stores it in PostgreSQL, orchestrates workflows with Apache Airflow, and exposes insights through an interactive Streamlit dashboard.
 
-  What Happens If This Pipeline Didn't Exist?
-    
-    - No Automation (Airflow): Engineers would have to manually execute scripts daily. If a failure occurred overnight or during weekends, data gaps would form silently without logs or alerts.
+---
 
-    - No Isolation (Docker): Deploying the environment on a new machine would cause dependency hell, port conflicts, and OS-specific bugs.
+## 📌 Project Highlights
 
-    - No Persistence (PostgreSQL): Storing data in flat files (.csv/.txt) would become unmanageable as volume grows, making historical time-series queries incredibly slow and inefficient.
+* Automated ETL workflow orchestrated with Apache Airflow
+* Containerized infrastructure using Docker and Docker Compose
+* PostgreSQL-based persistent storage for historical exchange rates
+* Data transformation and validation using Pandas
+* Interactive Streamlit dashboard for real-time analysis
+* Modular architecture designed for scalability and maintainability
 
-    - No Visualization (Streamlit): Business analysts would be forced to write raw SQL queries in pgAdmin to see currency trends, leading to a poor user experience.
+---
 
-🏗️ Architecture and Data Flow
+## 🏗️ Architecture
 
-  The architecture is built on a multi-container Docker network, ensuring that the orchestration layer, database, and visualization layer communicate seamlessly.
+```mermaid
+graph TD
+    A[Frankfurter API] --> B[Extract Task]
+    B --> C[Transform Task - Pandas]
+    C --> D[Load Task - Psycopg2]
+    D --> E[(PostgreSQL)]
+    E --> F[Streamlit Dashboard]
 
-  Data Source: Frankfurter API (Returns raw EUR-based currency exchange data in JSON format).
+    G[Apache Airflow Scheduler] --> B
+    G --> C
+    G --> D
+```
 
-  Extract and Transform (Apache Airflow and Pandas): Python scripts fetch the raw data, clean metadata, handle data types, and prepare clean DataFrames.
+---
 
-  Load (Psycopg2 and PostgreSQL): Cleaned data is appended into a relational PostgreSQL database container.
+## 🔄 Pipeline Workflow
 
-  Visualization (Streamlit): A web application queries the live PostgreSQL database to generate dynamic time-series line charts based on user selection.
+### 1. Extract
 
-🛠️ Tech Stack
+Daily exchange rate data is retrieved from the Frankfurter API with appropriate timeout configurations and error handling mechanisms.
 
-  - Core Language: Python 3.11+
+### 2. Transform
 
-  - Data Manipulation: Pandas
+Raw JSON responses are processed using Pandas. The transformation stage includes:
 
-  - Orchestration: Apache Airflow 2.x
+* Parsing and structuring the incoming data
+* Validating data types
+* Removing unnecessary metadata
+* Converting exchange rates into appropriate numerical formats
 
-  - Containerization: Docker and Docker Compose
+### 3. Load
 
-  - Database Management: PostgreSQL 15 and pgAdmin4
+Processed records are inserted into PostgreSQL using `psycopg2`.
 
-  - Web UI / Dashboard: Streamlit
+The loading process ensures:
 
-🚀 How to Run the Project Locally
-  
-  Follow these steps to spin up the entire multi-container infrastructure on your local machine.
+* Reliable persistence of historical data
+* Prevention of duplicate entries
+* Preservation of data integrity
 
-    Prerequisites
-      Docker and Docker Compose installed.
+### 4. Orchestration
 
-      Python 3.11+ configured (with a virtual environment preferred).
+Apache Airflow coordinates the entire ETL process as a Directed Acyclic Graph (DAG), enabling:
 
-  1. Clone the Repository
+* Task scheduling
+* Dependency management
+* Execution monitoring
+* Inter-task communication through XComs
 
-    Run the following commands in your terminal to clone and enter the project directory:
+### 5. Visualization
 
-      git clone https://github.com/kursadyavuzlu/Automated-Currency-Exchange-ETL-Pipeline-Dashboard.git
+A Streamlit application provides an intuitive interface for exploring exchange rate trends through interactive charts and filters powered by live PostgreSQL queries.
 
-      cd Automated-Currency-Exchange-ETL-Pipeline-Dashboard
+---
 
-  2. Start the Multi-Container Infrastructure (Airflow and Postgres)
+## 🛠️ Tech Stack
 
-    Run Docker Compose to build and start the database and orchestration layers by running this command in your terminal:
+| Category                | Technologies           |
+| ----------------------- | ---------------------- |
+| Language                | Python 3.11+           |
+| Data Processing         | Pandas                 |
+| Workflow Orchestration  | Apache Airflow 2.x     |
+| Database                | PostgreSQL 15          |
+| Database Administration | pgAdmin4               |
+| Containerization        | Docker, Docker Compose |
+| Dashboard               | Streamlit              |
+| Database Connectivity   | psycopg2               |
 
-      docker compose up -d
+---
 
-      Access the Airflow UI at http://localhost:8080 to trigger or unpause the currency_etl_pipeline DAG.
+## 🚀 Getting Started
 
-      Access pgAdmin4 at http://localhost:5050 to inspect the exchange_rates table under the postgres database.
+### Prerequisites
 
-  3. Run the Streamlit Dashboard
+Ensure the following tools are installed:
 
-      Ensure your virtual environment is active, install the UI requirements, and launch the application using these commands:
+* Docker
+* Docker Compose
+* Python 3.11+
 
-      pip install streamlit pandas psycopg2-binary
+---
 
-      streamlit run dashboard.py
+### 1. Clone the Repository
 
-      The interactive analytics dashboard will automatically open in your browser at http://localhost:8501.
+```bash
+git clone https://github.com/kursadyavuzlu/Automated-Currency-Exchange-ETL-Pipeline-Dashboard.git
 
-📈 Future Roadmaps and Enhancements
+cd Automated-Currency-Exchange-ETL-Pipeline-Dashboard
+```
 
-  Add Slack/Email notification alerts to the Airflow DAG on task failures.
+---
 
-  Implement a dbt (Data Build Tool) layer for advanced data warehouse modeling and testing.
+### 2. Start the Infrastructure
 
-  Migrate the local storage layer to a cloud-based warehouse (e.g., Snowflake or AWS Redshift).
+Build and launch the Airflow and PostgreSQL services:
+
+```bash
+docker compose up -d
+```
+
+---
+
+### 3. Access Airflow
+
+Open the Airflow interface:
+
+```
+http://localhost:8080
+```
+
+From the UI, enable or manually trigger the `currency_etl_pipeline` DAG.
+
+---
+
+### 4. Access pgAdmin
+
+Inspect the PostgreSQL database through pgAdmin:
+
+```
+http://localhost:5050
+```
+
+Locate the `exchange_rates` table inside the PostgreSQL instance.
+
+---
+
+### 5. Launch the Dashboard
+
+Install the required dependencies:
+
+```bash
+pip install streamlit pandas psycopg2-binary
+```
+
+Start the Streamlit application:
+
+```bash
+streamlit run dashboard.py
+```
+
+The dashboard will be available at:
+
+```
+http://localhost:8501
+```
+
+---
+
+## 📊 Dashboard Preview
+
+Add screenshots or GIF demonstrations of the Streamlit interface here.
+
+Example:
+
+```
+docs/dashboard-preview.png
+```
+
+---
+
+## 📈 Future Improvements
+
+* Integrate Slack or email notifications for Airflow task failures
+* Introduce dbt for data modeling and testing workflows
+* Implement automated data quality checks
+* Deploy the pipeline to cloud environments such as AWS
+* Replace local PostgreSQL with cloud-native data warehouses (Snowflake, Redshift)
+
+---
+
+## 📄 License
+
+This project is intended for educational and portfolio purposes.
